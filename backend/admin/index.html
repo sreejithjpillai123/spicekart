@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SpiceKart Admin Panel</title>
+    <meta name="description" content="SpiceKart Admin Dashboard — Manage products, orders, and subscribers." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN SCREEN ═══════════════ -->
+<div id="login-screen" class="login-screen">
+    <div class="login-bg">
+        <div class="login-orb login-orb-1"></div>
+        <div class="login-orb login-orb-2"></div>
+        <div class="login-orb login-orb-3"></div>
+    </div>
+    <div class="login-card">
+        <div class="login-logo">
+            <div class="logo-icon">🌿</div>
+            <div class="logo-text">
+                <span class="logo-brand">SpiceKart</span>
+                <span class="logo-sub">Admin Portal</span>
+            </div>
+        </div>
+        <h1 class="login-title">Welcome Back</h1>
+        <p class="login-subtitle">Sign in to manage your store</p>
+        <div id="login-error" class="login-error hidden"></div>
+        <form id="login-form" class="login-form">
+            <div class="form-group">
+                <label for="login-email">Email Address</label>
+                <input type="email" id="login-email" placeholder="admin@spicekart.com" required />
+            </div>
+            <div class="form-group">
+                <label for="login-password">Password</label>
+                <div class="password-wrapper">
+                    <input type="password" id="login-password" placeholder="Enter your password" required />
+                    <button type="button" class="toggle-pass" onclick="togglePassword()">👁</button>
+                </div>
+            </div>
+            <button type="submit" class="btn-login" id="btn-login">
+                <span id="login-btn-text">Sign In</span>
+                <span id="login-spinner" class="spinner hidden"></span>
+            </button>
+        </form>
+        <p class="login-hint">Default: admin@spicekart.com / Admin@123</p>
+    </div>
+</div>
+
+<!-- ═══════════════ ADMIN DASHBOARD ═══════════════ -->
+<div id="app" class="app hidden">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">🌿</div>
+            <div>
+                <div class="sidebar-brand">SpiceKart</div>
+                <div class="sidebar-admin-label">Admin Panel</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <button class="nav-item active" data-section="dashboard" onclick="showSection('dashboard')">
+                <span class="nav-icon">📊</span>
+                <span>Dashboard</span>
+            </button>
+            <button class="nav-item" data-section="products" onclick="showSection('products')">
+                <span class="nav-icon">🌿</span>
+                <span>Products</span>
+            </button>
+            <button class="nav-item" data-section="orders" onclick="showSection('orders')">
+                <span class="nav-icon">📦</span>
+                <span>Orders</span>
+                <span class="nav-badge" id="pending-badge">0</span>
+            </button>
+            <button class="nav-item" data-section="subscribers" onclick="showSection('subscribers')">
+                <span class="nav-icon">✉️</span>
+                <span>Subscribers</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="admin-info">
+                <div class="admin-avatar">A</div>
+                <div>
+                    <div class="admin-name" id="admin-name-display">Admin</div>
+                    <div class="admin-role">Administrator</div>
+                </div>
+            </div>
+            <button class="btn-logout" onclick="logout()">Sign Out</button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Top Header -->
+        <header class="top-header">
+            <button class="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
+            <div class="header-title" id="header-title">Dashboard</div>
+            <div class="header-right">
+                <div class="header-time" id="header-time"></div>
+                <div class="connection-dot" id="conn-dot" title="API Connected"></div>
+            </div>
+        </header>
+
+        <!-- ── DASHBOARD SECTION ── -->
+        <section id="section-dashboard" class="section active">
+            <div class="section-header">
+                <h2>Dashboard Overview</h2>
+                <button class="btn-secondary" onclick="loadDashboard()">↻ Refresh</button>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card stat-green">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Total Revenue</div>
+                        <div class="stat-value" id="stat-revenue">₹0</div>
+                    </div>
+                </div>
+                <div class="stat-card stat-blue">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Total Orders</div>
+                        <div class="stat-value" id="stat-orders">0</div>
+                    </div>
+                </div>
+                <div class="stat-card stat-orange">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Pending Orders</div>
+                        <div class="stat-value" id="stat-pending">0</div>
+                    </div>
+                </div>
+                <div class="stat-card stat-purple">
+                    <div class="stat-icon">☀️</div>
+                    <div class="stat-content">
+                        <div class="stat-label">Today's Revenue</div>
+                        <div class="stat-value" id="stat-today">₹0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart + Recent Orders -->
+            <div class="dashboard-grid">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Last 7 Days Sales</h3>
+                    </div>
+                    <div class="chart-container" id="bar-chart"></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Recent Orders</h3>
+                        <button class="btn-link" onclick="showSection('orders')">View all →</button>
+                    </div>
+                    <div id="recent-orders-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── PRODUCTS SECTION ── -->
+        <section id="section-products" class="section">
+            <div class="section-header">
+                <h2>Products</h2>
+                <button class="btn-primary" onclick="openProductModal()">+ Add Product</button>
+            </div>
+            <div class="card">
+                <div class="table-toolbar">
+                    <input type="text" id="product-search" placeholder="Search products..." class="search-input" oninput="filterProducts()" />
+                    <span class="table-count" id="product-count"></span>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table" id="products-table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Badge</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── ORDERS SECTION ── -->
+        <section id="section-orders" class="section">
+            <div class="section-header">
+                <h2>Orders</h2>
+                <select id="order-filter" class="filter-select" onchange="loadOrders()">
+                    <option value="">All Orders</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Cancelled">Cancelled</option>
+                </select>
+            </div>
+            <div class="card">
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Payment</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-tbody"></tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="orders-pagination"></div>
+            </div>
+        </section>
+
+        <!-- ── SUBSCRIBERS SECTION ── -->
+        <section id="section-subscribers" class="section">
+            <div class="section-header">
+                <h2>Newsletter Subscribers</h2>
+                <span class="badge-count" id="sub-count-badge">0 subscribers</span>
+            </div>
+            <div class="card">
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Source</th>
+                                <th>Subscribed On</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subscribers-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<!-- ═══════════════ PRODUCT MODAL ═══════════════ -->
+<div id="product-modal" class="modal hidden">
+    <div class="modal-overlay" onclick="closeProductModal()"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-title">Add Product</h3>
+            <button class="modal-close" onclick="closeProductModal()">✕</button>
+        </div>
+        <form id="product-form" class="modal-form">
+            <input type="hidden" id="product-id" />
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Product Name *</label>
+                    <input type="text" id="p-name" required placeholder="Purple Grade Cardamom" />
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <input type="text" id="p-category" value="Cardamom" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Description *</label>
+                <textarea id="p-desc" rows="3" required placeholder="Product description..."></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Price (₹) *</label>
+                    <input type="number" id="p-price" required min="0" step="0.01" />
+                </div>
+                <div class="form-group">
+                    <label>Original Price (₹)</label>
+                    <input type="number" id="p-original-price" min="0" step="0.01" placeholder="Optional" />
+                </div>
+                <div class="form-group">
+                    <label>Stock</label>
+                    <input type="number" id="p-stock" min="0" value="0" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Badge</label>
+                    <select id="p-badge">
+                        <option value="">No Badge</option>
+                        <option value="SALE">SALE</option>
+                        <option value="SOLD OUT">SOLD OUT</option>
+                        <option value="NEW">NEW</option>
+                        <option value="BEST SELLER">BEST SELLER</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Grade Color</label>
+                    <input type="color" id="p-color" value="#4a6741" />
+                </div>
+                <div class="form-group">
+                    <label>Accent Color</label>
+                    <input type="color" id="p-accent" value="#90c870" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group checkbox-group">
+                    <label>
+                        <input type="checkbox" id="p-featured" />
+                        Featured Product
+                    </label>
+                </div>
+                <div class="form-group checkbox-group">
+                    <label>
+                        <input type="checkbox" id="p-active" checked />
+                        Active
+                    </label>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn-secondary" onclick="closeProductModal()">Cancel</button>
+                <button type="submit" class="btn-primary" id="product-submit-btn">Save Product</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ═══════════════ ORDER DETAIL MODAL ═══════════════ -->
+<div id="order-modal" class="modal hidden">
+    <div class="modal-overlay" onclick="closeOrderModal()"></div>
+    <div class="modal-content modal-lg">
+        <div class="modal-header">
+            <h3 id="order-modal-title">Order Details</h3>
+            <button class="modal-close" onclick="closeOrderModal()">✕</button>
+        </div>
+        <div id="order-detail-content"></div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden"></div>
+
+<script src="admin.js"></script>
+</body>
+</html>
