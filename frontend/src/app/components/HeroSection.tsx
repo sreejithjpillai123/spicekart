@@ -137,7 +137,18 @@ export default function HeroSection() {
             </button>
 
             {/* Slide dots */}
-            <div style={{ position: 'absolute', bottom: '60px', left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: '10px', zIndex: 5 }}>
+           <div
+  className="hero-dots"
+  style={{
+    position: 'absolute',
+    bottom: '60px',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    display: 'flex',
+    gap: '10px',
+    zIndex: 5
+  }}
+>
                 {slides.map((_, i) => (
                     <button
                         key={i}
