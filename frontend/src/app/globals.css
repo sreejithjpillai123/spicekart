@@ -306,13 +306,16 @@ body {
   z-index: 1080;
   padding: 0;
   transform: translateY(-110%);
-  transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+  visibility: hidden;
+  transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.38s;
   border-bottom: 1px solid rgba(200, 169, 110, 0.2);
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.35);
 }
 
 .mobile-menu-drawer.open {
   transform: translateY(0);
+  visibility: visible;
+  transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s;
 }
 
 .mobile-menu-links {
