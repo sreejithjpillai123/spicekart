@@ -1422,9 +1422,9 @@ body {
   }
 }
 
-@media (max-width: 426px) {
+@media (max-width: 768px) {
 
- 
+
 
   .hero-scroll-indicator {
     display: none !important;
@@ -1443,27 +1443,49 @@ body {
   }
 
   .hero-section {
-    height: 55vh;
-    min-height: 420px;
-    max-height: 550px;
-
+    height: 65vh;
+    min-height: 460px;
+    max-height: 600px;
   }
 
   .hero-content {
-    padding: 100px 20px 40px;
-    /* padding-top: var(--nav-height); */
+    padding: 80px 20px 20px;
+  }
+
+  .hero-title {
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+
+  .hero-subtitle {
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+
+  .hero-tagline {
+    font-size: 10px;
+    margin-bottom: 12px;
+  }
+
+  .btn-primary,
+  .btn-outline {
+    padding: 10px 20px;
+    font-size: 11px;
   }
 
   /* Navbar shrinks slightly on small screens */
- .navbar {
-  position: fixed;   /* ← change this */
-  top: 0;
-  left: 0;
-  width: 100%;
-  padding: 0 16px;
-  height: 64px;
-  background: transparent;
-}
+  .navbar,
+  .navbar.scrolled {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 0 16px;
+    height: 64px;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
 
   /* :root {
     --nav-height: 64px;
