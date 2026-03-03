@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { getProducts, subscribeNewsletter, type Product } from '../lib/api';
 import { useCart } from '../context/CartContext';
+import CubeFlythrough from './CubeFlythrough';
 
 // Static home page showcase products (fallback + featured)
 const staticProducts = [
@@ -103,7 +104,7 @@ export default function MainContent() {
     const [subMsg, setSubMsg] = useState('');
 
     useEffect(() => {
-        getProducts({ sort: 'featured' })
+        getProducts()
             .then(data => setLiveProducts(data.slice(0, 3)))
             .catch(() => { /* silently fall back to static products */ });
     }, []);
@@ -322,7 +323,13 @@ export default function MainContent() {
                         <div key={p._id} className={`product-card fade-in-up fade-in-up-delay-${i + 1}`} id={`product-live-${i}`}>
                             <div className="product-img-wrap">
                                 {p.badge && <span className="product-tag">{p.badge}</span>}
-                                <span className="product-img-emoji" style={{ fontSize: '48px' }}>🌿</span>
+                                {p.images && p.images.length > 0 ? (
+                                    <span className="product-img-emoji">
+                                        <img src={p.images[0]} alt="" />
+                                    </span>
+                                ) : (
+                                    <span className="product-img-emoji" style={{ fontSize: '48px' }}>🌿</span>
+                                )}
                             </div>
                             <div className="product-info">
                                 <span className="product-category">{p.category}</span>
@@ -362,7 +369,7 @@ export default function MainContent() {
                 </div>
 
                 <div className="products-cta fade-in-up">
-                    <a href="#shop" className="btn-primary" id="view-all-btn" style={{ clipPath: 'none', borderRadius: '2px' }}>View All Products</a>
+                    <a href="/shop" className="btn-primary" id="view-all-btn" style={{ clipPath: 'none', borderRadius: '2px' }}>View All Products</a>
                 </div>
             </section>
 
@@ -511,8 +518,8 @@ export default function MainContent() {
                     </a>
                 </div>
             </section>
-
-
+            {/* ─── 3-D Cube Flythrough (woxro-style) ─── */}
+            <CubeFlythrough />
 
             {/* ─── Testimonials ─── */}
             <section id="blogs" className="testimonials-section">

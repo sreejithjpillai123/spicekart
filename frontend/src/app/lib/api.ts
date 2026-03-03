@@ -1,11 +1,11 @@
 // API base URL from environment
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
-// Generic fetch wrapper
 async function apiFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+    const headers = { 'Content-Type': 'application/json', ...options.headers };
     const res = await fetch(`${API_BASE}${path}`, {
-        headers: { 'Content-Type': 'application/json', ...options.headers },
         ...options,
+        headers,
     });
     const data = await res.json();
     if (!data.success) throw new Error(data.message || 'API error');
@@ -98,4 +98,34 @@ export async function subscribeNewsletter(email: string): Promise<{ message: str
         body: JSON.stringify({ email }),
     });
     return data;
+}
+
+/* ──────────────────────────────────
+   ADMIN
+────────────────────────────────── */
+export async function adminLogin(email: string, password: string): Promise<{ token: string; admin: any }> {
+    const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.message || 'Login failed');
+    return data;
+}
+
+export async function getAdminProducts(token: string): Promise<Product[]> {
+    const data = await apiFetch<{ products: Product[] }>('/products/all', {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    return data.products;
+}
+
+export async function createProduct(token: string, productData: any): Promise<Product> {
+    const data = await apiFetch<{ product: Product }>('/products', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify(productData),
+    });
+    return data.product;
 }

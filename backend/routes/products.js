@@ -8,11 +8,12 @@ const router = express.Router();
 // @desc   Get all active products (public)
 router.get('/', async (req, res) => {
     try {
-        const { sort, category, search } = req.query;
+        const { sort, category, search, featured } = req.query;
         let query = { isActive: true };
 
         if (category) query.category = category;
         if (search) query.name = { $regex: search, $options: 'i' };
+        if (featured === 'true') query.featured = true;
 
         let sortOption = { createdAt: -1 };
         if (sort === 'price_asc') sortOption = { price: 1 };
