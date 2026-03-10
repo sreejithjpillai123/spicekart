@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { getProducts, subscribeNewsletter, type Product } from '../lib/api';
+import { getProducts, getShopSettings, getGradingSection, subscribeNewsletter, type Product, type ShopSettings, type GradingGrade } from '../lib/api';
+import Link from 'next/link';
 import { useCart } from '../context/CartContext';
 import CubeFlythrough from './CubeFlythrough';
 
@@ -24,7 +25,7 @@ const testimonials = [
     { quote: 'Finally, a brand that understands sustainability and flavour in equal measure. These spices have transformed my cooking.', author: 'Ananya Sharma', location: 'Bengaluru, KA', emoji: '👩‍🍳', stars: 5 },
 ];
 
-function useScrollReveal() {
+function useScrollReveal(dependencies: any[] = []) {
     const ref = useRef<HTMLDivElement>(null);
     useEffect(() => {
         const observer = new IntersectionObserver((entries) => {
@@ -40,7 +41,7 @@ function useScrollReveal() {
         const targets = el.querySelectorAll('.fade-in-up');
         targets.forEach(t => observer.observe(t));
         return () => observer.disconnect();
-    }, []);
+    }, dependencies);
     return ref;
 }
 
@@ -97,16 +98,50 @@ function RotatingHeading() {
 }
 
 export default function MainContent() {
-    const contentRef = useScrollReveal();
     const { addToCart } = useCart();
     const [liveProducts, setLiveProducts] = useState<Product[]>([]);
+    const contentRef = useScrollReveal([liveProducts.length]);
+    const [prodLoading, setProdLoading] = useState(true);
     const [subStatus, setSubStatus] = useState<'idle' | 'loading' | 'done' | 'error'>('idle');
     const [subMsg, setSubMsg] = useState('');
+    const [shopSettings, setShopSettings] = useState<Partial<ShopSettings>>({
+        sectionEyebrow: 'Our Collection',
+        sectionTitle: 'Premium Spice Range',
+        sectionBody: 'Handpicked, sun-dried and carefully packaged to preserve every note of flavour and aroma.',
+    });
+
+    const staticGrades: GradingGrade[] = [
+        { label: 'Purple Grade', img: 'https://cdn.shopify.com/s/files/1/0581/5926/8038/files/EAC_Website_MISC-13.png?v=1625571964', imgH: 90 },
+        { label: 'Pink Grade', img: 'https://cdn.shopify.com/s/files/1/0581/5926/8038/files/EAC_Website_MISC-14.png?v=1625572139', imgH: 80 },
+        { label: 'Green Grade', img: 'https://cdn.shopify.com/s/files/1/0581/5926/8038/files/EAC_Website_MISC-15.png?v=1625572246', imgH: 72 },
+        { label: 'Orange Grade', img: 'https://cdn.shopify.com/s/files/1/0581/5926/8038/files/EAC_Website_MISC-16.png?v=1625572290', imgH: 64 },
+        { label: 'Red Grade', img: 'https://cdn.shopify.com/s/files/1/0581/5926/8038/files/EAC_Website_MISC-17.png?v=1625572334', imgH: 56 },
+    ];
+    const [gradingData, setGradingData] = useState<{ title: string; body: string; grades: GradingGrade[] }>({
+        title: 'Graded to your Requirement',
+        body: "'One size doesn't fit all' is true in the case of cardamom as well. Because of their multiple uses and benefits, cardamom pods of different sizes are used in different applications. That is why Emperor Akbar Cardamom is graded by size. However, the grading is never about quality. Whatever the size, quality remains world class.",
+        grades: staticGrades,
+    });
 
     useEffect(() => {
         getProducts()
-            .then(data => setLiveProducts(data.slice(0, 3)))
-            .catch(() => { /* silently fall back to static products */ });
+            .then(data => {
+                setLiveProducts(data.slice(0, 3));
+                setProdLoading(false);
+            })
+            .catch(() => {
+                setProdLoading(false); // fall back to static products
+            });
+        getShopSettings()
+            .then(data => setShopSettings(data))
+            .catch(() => { /* use defaults */ });
+        getGradingSection()
+            .then(data => {
+                if (data.grades && data.grades.length > 0) {
+                    setGradingData(data);
+                }
+            })
+            .catch(() => { /* keep static fallback */ });
     }, []);
 
     const handleNewsletterSubmit = async () => {
@@ -306,27 +341,42 @@ export default function MainContent() {
             <section id="shop" className="products-section">
                 <div className="products-header">
                     <div className="fade-in-up">
-                        <p className="section-eyebrow">Our Collection</p>
+                        <p className="section-eyebrow">{shopSettings.sectionEyebrow || 'Our Collection'}</p>
                     </div>
                     <div className="fade-in-up fade-in-up-delay-1">
-                        <h2 className="section-title">Premium Spice Range</h2>
+                        <h2 className="section-title">{shopSettings.sectionTitle || 'Premium Spice Range'}</h2>
                     </div>
                     <div className="fade-in-up fade-in-up-delay-2">
                         <p className="section-body" style={{ marginTop: '14px' }}>
-                            Handpicked, sun-dried and carefully packaged to preserve every note of flavour and aroma.
+                            {shopSettings.sectionBody || 'Handpicked, sun-dried and carefully packaged to preserve every note of flavour and aroma.'}
                         </p>
                     </div>
                 </div>
 
                 <div className="products-grid">
-                    {(liveProducts.length > 0 ? liveProducts.map((p, i) => (
+                    {prodLoading ? (
+                        // ── Skeleton cards while loading ──
+                        [1, 2, 3].map(i => (
+                            <div key={i} className="product-card" style={{ pointerEvents: 'none' }}>
+                                <div className="product-img-wrap" style={{ background: 'linear-gradient(90deg,#ece9e0,#f5f2eb,#ece9e0)', backgroundSize: '200% 100%', animation: 'shimmer 1.4s infinite' }} />
+                                <div className="product-info">
+                                    <div style={{ height: '10px', width: '60px', background: '#ece9e0', borderRadius: '4px', marginBottom: '10px', animation: 'shimmer 1.4s infinite' }} />
+                                    <div style={{ height: '18px', width: '80%', background: '#ece9e0', borderRadius: '4px', marginBottom: '8px', animation: 'shimmer 1.4s infinite' }} />
+                                    <div style={{ height: '12px', width: '100%', background: '#ece9e0', borderRadius: '4px', marginBottom: '6px', animation: 'shimmer 1.4s infinite' }} />
+                                    <div style={{ height: '12px', width: '70%', background: '#ece9e0', borderRadius: '4px', animation: 'shimmer 1.4s infinite' }} />
+                                </div>
+                            </div>
+                        ))
+                    ) : (liveProducts.length > 0 ? liveProducts.map((p, i) => (
                         <div key={p._id} className={`product-card fade-in-up fade-in-up-delay-${i + 1}`} id={`product-live-${i}`}>
-                            <div className="product-img-wrap">
+                            <div className="product-img-wrap" style={p.images && p.images.length > 0 ? { padding: 0 } : {}}>
                                 {p.badge && <span className="product-tag">{p.badge}</span>}
                                 {p.images && p.images.length > 0 ? (
-                                    <span className="product-img-emoji">
-                                        <img src={p.images[0]} alt="" />
-                                    </span>
+                                    <img
+                                        src={p.images[0]}
+                                        alt={p.name}
+                                        className="product-img-cover"
+                                    />
                                 ) : (
                                     <span className="product-img-emoji" style={{ fontSize: '48px' }}>🌿</span>
                                 )}
@@ -518,147 +568,104 @@ export default function MainContent() {
                     </a>
                 </div>
             </section>
-            {/* ─── 3-D Cube Flythrough (woxro-style) ─── */}
-            <CubeFlythrough />
 
-            {/* ─── Testimonials ─── */}
-            <section id="blogs" className="testimonials-section">
-                <div className="fade-in-up">
-                    <p className="section-eyebrow">Customer Stories</p>
-                </div>
-                <div className="fade-in-up fade-in-up-delay-1">
-                    <h2 className="section-title">Loved by Spice Enthusiasts</h2>
-                </div>
-                <div className="testimonials-grid">
-                    {testimonials.map((t, i) => (
-                        <div key={i} className={`testimonial-card fade-in-up fade-in-up-delay-${i + 1}`} id={`testimonial-${i}`}>
-                            <div className="star-rating">{'★'.repeat(t.stars)}</div>
-                            <div className="testimonial-quote">&ldquo;</div>
-                            <p className="testimonial-text">{t.quote}</p>
-                            <div className="testimonial-author">
-                                <div className="author-avatar">{t.emoji}</div>
-                                <div>
-                                    <div className="author-name">{t.author}</div>
-                                    <div className="author-loc">{t.location}</div>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </section>
+
+
 
             {/* ─── Graded to your Requirement ─── */}
             <section id="grading" style={{
                 background: '#ffffff',
-                padding: '90px 80px',
+                padding: '80px 40px',
                 textAlign: 'center',
             }}>
                 <div className="fade-in-up">
-                    <h2 className="section-title" style={{ color: '#4a6741', marginBottom: '24px' }}>
-                        Graded to your Requirement
+                    <h2 style={{
+                        fontFamily: 'Playfair Display, serif',
+                        fontSize: 'clamp(26px, 3.5vw, 42px)',
+                        fontWeight: 400,
+                        color: '#4a6741',
+                        marginBottom: '28px',
+                        letterSpacing: '0.5px',
+                    }}>
+                        {gradingData.title}
                     </h2>
                 </div>
                 <div className="fade-in-up fade-in-up-delay-1">
-                    <p className="section-body" style={{ maxWidth: '680px', margin: '0 auto 56px' }}>
-                        &apos;One size doesn&apos;t fit all&apos; is true in the case of cardamom as well. Because of their
-                        multiple uses and benefits, cardamom pods of different sizes are used in different
-                        applications. That is why our Cardamom is graded by size. However, the
-                        grading is never about quality. Whatever the size, quality remains world class.
+                    <p style={{
+                        fontFamily: 'Cormorant Garamond, serif',
+                        fontSize: 'clamp(15px, 1.8vw, 18px)',
+                        color: '#555',
+                        lineHeight: 1.85,
+                        maxWidth: '660px',
+                        margin: '0 auto 56px',
+                    }}>
+                        {gradingData.body}
                     </p>
                 </div>
 
-                {/* Grade pods */}
+                {/* Grade Cards */}
                 <div className="fade-in-up fade-in-up-delay-2" style={{
                     display: 'flex',
                     justifyContent: 'center',
                     alignItems: 'flex-end',
-                    gap: '36px',
+                    gap: 'clamp(20px, 4vw, 52px)',
                     flexWrap: 'wrap',
-                    marginBottom: '56px',
                 }}>
-                    {[
-                        { bg: '#f3e8fa', scale: 1.15, image: 'https://cdn.shopify.com/s/files/1/0581/5926/8038/files/EAC_Website_MISC-13.png?v=1625571964' },
-                        { bg: '#fce8f0', scale: 1.08, image: 'https://cdn.shopify.com/s/files/1/0581/5926/8038/files/EAC_Website_MISC-14.png?v=1625572139' },
-                        { bg: '#e8f5ea', scale: 1.0, image: 'https://cdn.shopify.com/s/files/1/0581/5926/8038/files/EAC_Website_MISC-15.png?v=1625572139' },
-                        { bg: '#fdf0e6', scale: 0.92, image: 'https://cdn.shopify.com/s/files/1/0581/5926/8038/files/EAC_Website_MISC-16.png?v=1625572139' },
-                        { bg: '#fdeaea', scale: 0.85, image: 'https://cdn.shopify.com/s/files/1/0581/5926/8038/files/EAC_Website_MISC-17.png?v=1625572139' },
-                    ].map((grade, i) => (
-                        <div key={i} id={`grade-${i}`} style={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: '10px',
-                            transition: 'transform 0.3s ease',
-                            cursor: 'default',
-                        }}>
-                            {/* Cardamom Pod — image or SVG */}
-                            <div style={{
-                                transform: `scale(${grade.scale})`,
-                                transformOrigin: 'bottom center',
-                                marginBottom: `${(grade.scale - 0.85) * 20}px`,
-                            }}>
-                                {'image' in grade && grade.image ? (
-                                    <img
-                                        src={grade.image}
-                                        alt="Cardamom grade"
-                                        style={{
-                                            width: '80px',
-                                            height: '96px',
-                                            objectFit: 'contain',
-                                            display: 'block',
-                                            filter: 'drop-shadow(0 4px 12px rgba(123,63,160,0.25))',
-                                        }}
-                                    />
-                                ) : (
-                                    <svg width="60" height="96" viewBox="0 0 60 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        {/* Pod body */}
-                                        <ellipse cx="30" cy="54" rx="22" ry="36" fill="#4a8a3a" />
-                                        {/* Highlight */}
-                                        <ellipse cx="22" cy="38" rx="7" ry="14" fill="#6aaa5a" opacity="0.55" />
-                                        {/* Ridge lines */}
-                                        <line x1="30" y1="18" x2="30" y2="88" stroke="#2d6a28" strokeWidth="1.2" opacity="0.6" />
-                                        <line x1="20" y1="22" x2="18" y2="84" stroke="#2d6a28" strokeWidth="0.8" opacity="0.4" />
-                                        <line x1="40" y1="22" x2="42" y2="84" stroke="#2d6a28" strokeWidth="0.8" opacity="0.4" />
-                                        {/* Tip */}
-                                        <ellipse cx="30" cy="18" rx="5" ry="6" fill="#3a7a2e" />
-                                        {/* Stem */}
-                                        <line x1="30" y1="12" x2="30" y2="2" stroke="#5a8a3a" strokeWidth="2" strokeLinecap="round" />
-                                    </svg>
-                                )}
-                            </div>
-                        </div>
-                    ))}
-                </div>
-
-                {/* CTA Button */}
-                <div className="fade-in-up fade-in-up-delay-3">
-                    <a
-                        href="#shop"
-                        id="grading-cta-btn"
-                        style={{
-                            display: 'inline-block',
-                            fontFamily: 'Jost, sans-serif',
-                            fontSize: '11px',
-                            fontWeight: 600,
-                            letterSpacing: '2.5px',
-                            textTransform: 'uppercase',
-                            color: '#4a6741',
-                            border: '1px solid #4a6741',
-                            padding: '15px 36px',
-                            textDecoration: 'none',
-                            transition: 'all 0.3s ease',
-                        }}
-                        onMouseEnter={e => {
-                            (e.currentTarget as HTMLAnchorElement).style.background = '#4a6741';
-                            (e.currentTarget as HTMLAnchorElement).style.color = '#fff';
-                        }}
-                        onMouseLeave={e => {
-                            (e.currentTarget as HTMLAnchorElement).style.background = 'transparent';
-                            (e.currentTarget as HTMLAnchorElement).style.color = '#4a6741';
-                        }}
-                    >
-                        Setting Standards for Others to Follow
-                    </a>
+                    {gradingData.grades.map((grade, i) => {
+                        // derive slug from the label: "Purple Grade" → "purple"
+                        const slug = grade.label.toLowerCase().split(' ')[0];
+                        return (
+                            <Link
+                                key={grade.label + i}
+                                href={`/collection/${slug}`}
+                                style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    gap: '12px',
+                                    textDecoration: 'none',
+                                    cursor: 'pointer',
+                                    transition: 'transform 0.25s ease',
+                                    padding: '12px 8px 16px',
+                                    borderRadius: '8px',
+                                }}
+                                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-6px)'; }}
+                                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; }}
+                            >
+                                <img
+                                    src={grade.img}
+                                    alt={grade.label}
+                                    style={{
+                                        height: `${grade.imgH}px`,
+                                        width: 'auto',
+                                        objectFit: 'contain',
+                                        display: 'block',
+                                        marginBottom: '4px',
+                                        filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.10))',
+                                        transition: 'filter 0.25s ease',
+                                    }}
+                                />
+                                <span style={{
+                                    fontFamily: 'Jost, sans-serif',
+                                    fontSize: '13px',
+                                    color: '#666',
+                                    letterSpacing: '0.3px',
+                                }}>
+                                    {grade.label}
+                                </span>
+                                <span style={{
+                                    fontFamily: 'Jost, sans-serif',
+                                    fontSize: '11px',
+                                    color: '#4a6741',
+                                    letterSpacing: '0.5px',
+                                    fontWeight: 600,
+                                    opacity: 0.85,
+                                }}>
+                                    View →
+                                </span>
+                            </Link>
+                        );
+                    })}
                 </div>
             </section>
 

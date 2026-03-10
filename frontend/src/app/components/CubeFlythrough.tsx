@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react';
 
 // Cube face images — warm spice tones from Shopify CDN used in the project
 const FACE_IMAGES = [
-    'https://cdn.shopify.com/s/files/1/0581/5926/8038/files/EAC_Website_MISC-13.png?v=1625571964',
+    'https://www.emperorakbar.com/cdn/shop/files/EAC_Website_MISC-07_869af3c3-d169-449d-a9dc-1db16cf3e7a4_1080x.png?v=1625644495',
     'https://cdn.shopify.com/s/files/1/0581/5926/8038/files/EAC_Website_MISC-14.png?v=1625572139',
     'https://cdn.shopify.com/s/files/1/0581/5926/8038/files/EAC_Website_MISC-15.png?v=1625572139',
     'https://cdn.shopify.com/s/files/1/0581/5926/8038/files/EAC_Website_MISC-16.png?v=1625572139',

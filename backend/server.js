@@ -25,6 +25,9 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/products', require('./routes/products'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/subscribers', require('./routes/subscribers'));
+app.use('/api/blogs', require('./routes/blogs'));
+app.use('/api/shop-settings', require('./routes/shopSettings'));
+app.use('/api/grade-collections', require('./routes/gradeCollections'));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -43,7 +46,17 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`🚀 SpiceKart Backend running on http://localhost:${PORT}`);
     console.log(`📋 Admin Panel: http://localhost:${PORT}`);
+    console.log('✅ Connected with authentication!');
+});
+
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.error(`❌ Port ${PORT} is already in use. Kill the existing process and restart.`);
+        process.exit(1);
+    } else {
+        throw err;
+    }
 });

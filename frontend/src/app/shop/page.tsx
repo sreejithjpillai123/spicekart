@@ -271,41 +271,58 @@ export default function ShopPage() {
                                         </div>
                                     )}
 
-                                    {/* Product visual */}
-                                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
-                                        <div style={{
-                                            width: '90px', height: '140px', borderRadius: '8px 8px 6px 6px',
-                                            overflow: 'hidden', boxShadow: '4px 8px 20px rgba(0,0,0,0.25)',
-                                            display: 'flex', flexDirection: 'column',
-                                            transition: 'transform 0.3s ease',
-                                            transform: hoveredId === p._id ? 'scale(1.04)' : 'scale(1)',
-                                        }}>
-                                            <div style={{ background: `linear-gradient(135deg,${p.gradeColor},${p.gradeColor}cc)`, height: '38px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
-                                                <span style={{ fontFamily: 'Jost,sans-serif', fontSize: '6px', fontWeight: 800, color: '#fff', letterSpacing: '1px' }}>SPICE</span>
-                                                <div style={{ width: '40px', height: '0.5px', background: 'rgba(255,255,255,0.5)' }} />
-                                                <span style={{ fontFamily: 'Jost,sans-serif', fontSize: '5px', color: 'rgba(255,255,255,0.8)' }}>Alleppey · Kerala</span>
-                                            </div>
-                                            <div style={{ flex: 1, background: 'linear-gradient(180deg,#f8f8f3,#eeede5)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '6px' }}>
-                                                <span style={{ fontSize: '22px' }}>🌿</span>
-                                                <span style={{ fontFamily: 'Jost,sans-serif', fontSize: '5.5px', fontWeight: 700, color: '#333', textAlign: 'center', lineHeight: 1.4 }}>NATURAL GREEN<br />CARDAMOM</span>
-                                                <div style={{ background: p.gradeColor, color: '#fff', borderRadius: '2px', padding: '1px 6px', fontSize: '5px', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.5px' }}>
-                                                    100% NATURAL
+                                    {/* Product visual — real image if uploaded, else decorative fallback */}
+                                    {p.images && p.images.length > 0 ? (
+                                        <img
+                                            src={p.images[0]}
+                                            alt={p.name}
+                                            style={{
+                                                position: 'absolute',
+                                                inset: 0,
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'cover',
+                                                objectPosition: 'center',
+                                                transition: 'transform 0.4s ease',
+                                                transform: hoveredId === p._id ? 'scale(1.06)' : 'scale(1)',
+                                            }}
+                                        />
+                                    ) : (
+                                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+                                            <div style={{
+                                                width: '90px', height: '140px', borderRadius: '8px 8px 6px 6px',
+                                                overflow: 'hidden', boxShadow: '4px 8px 20px rgba(0,0,0,0.25)',
+                                                display: 'flex', flexDirection: 'column',
+                                                transition: 'transform 0.3s ease',
+                                                transform: hoveredId === p._id ? 'scale(1.04)' : 'scale(1)',
+                                            }}>
+                                                <div style={{ background: `linear-gradient(135deg,${p.gradeColor},${p.gradeColor}cc)`, height: '38px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
+                                                    <span style={{ fontFamily: 'Jost,sans-serif', fontSize: '6px', fontWeight: 800, color: '#fff', letterSpacing: '1px' }}>SPICE</span>
+                                                    <div style={{ width: '40px', height: '0.5px', background: 'rgba(255,255,255,0.5)' }} />
+                                                    <span style={{ fontFamily: 'Jost,sans-serif', fontSize: '5px', color: 'rgba(255,255,255,0.8)' }}>Alleppey · Kerala</span>
+                                                </div>
+                                                <div style={{ flex: 1, background: 'linear-gradient(180deg,#f8f8f3,#eeede5)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '5px', padding: '6px' }}>
+                                                    <span style={{ fontSize: '22px' }}>🌿</span>
+                                                    <span style={{ fontFamily: 'Jost,sans-serif', fontSize: '5.5px', fontWeight: 700, color: '#333', textAlign: 'center', lineHeight: 1.4 }}>NATURAL GREEN<br />CARDAMOM</span>
+                                                    <div style={{ background: p.gradeColor, color: '#fff', borderRadius: '2px', padding: '1px 6px', fontSize: '5px', fontFamily: 'Jost,sans-serif', fontWeight: 700, letterSpacing: '0.5px' }}>
+                                                        100% NATURAL
+                                                    </div>
                                                 </div>
                                             </div>
+                                            {p.category !== 'Gift Cards' && (
+                                                <div style={{
+                                                    width: '70px', height: '50px',
+                                                    borderRadius: '50% 50% 45% 45% / 30% 30% 60% 60%',
+                                                    background: `linear-gradient(180deg, ${p.gradeAccent}88, ${p.gradeColor}44)`,
+                                                    border: `2px solid ${p.gradeColor}66`,
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    fontSize: '18px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                                                }}>
+                                                    🌿
+                                                </div>
+                                            )}
                                         </div>
-                                        {p.category !== 'Gift Cards' && (
-                                            <div style={{
-                                                width: '70px', height: '50px',
-                                                borderRadius: '50% 50% 45% 45% / 30% 30% 60% 60%',
-                                                background: `linear-gradient(180deg, ${p.gradeAccent}88, ${p.gradeColor}44)`,
-                                                border: `2px solid ${p.gradeColor}66`,
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                fontSize: '18px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                                            }}>
-                                                🌿
-                                            </div>
-                                        )}
-                                    </div>
+                                    )}
 
                                     <div style={{ position: 'absolute', bottom: '-20px', right: '-20px', width: '120px', height: '120px', borderRadius: '50%', background: `radial-gradient(circle, ${p.gradeAccent}66 0%, transparent 70%)`, pointerEvents: 'none' }} />
                                 </div>

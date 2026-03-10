@@ -10,7 +10,7 @@ const navLinks = [
     { label: 'About', href: '/about' },
     { label: 'Shop', href: '/shop' },
     { label: 'Recipes', href: '#recipes' },
-    { label: 'Blogs', href: '#blogs' },
+    { label: 'Blogs', href: '/blog' },
     { label: 'CSR', href: '#csr' },
     { label: 'FAQs', href: '#faqs' },
 ];
@@ -76,7 +76,8 @@ export default function Navbar() {
                         className="navbar-brand-logo"
                     />
                     <span className="navbar-brand-text" style={{ color: 'white' }}>
-                        SpiceKart
+                        SpiceDen
+                        
                     </span>
                 </Link>
 
